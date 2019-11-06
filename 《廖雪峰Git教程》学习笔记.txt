@@ -1,0 +1,541 @@
+=== Table of Contents ===
+
+1. Version Control System (VCS)
+
+2. 添加/修改文件
+3. 撤销工作区 & 暂存区的修改
+4. 版本回退
+5. 删除文件
+
+6. 为本地库添加远程库
+7. 从远程库克隆一个本地库
+8. git pull
+
+9. merge branch
+10. Solve merge conflicts
+11. 删除没有merge的分支 
+
+12. Stash 储藏暂存区的文件
+13. tag标签
+
+
+
+
+=== Part 1. Version Control System (VCS) ===
+
+=== 集中式的版本控制系统 ===
+
+版本库集中存放在中央服务器的，而编辑需要用的是自己的电脑。所以要先从中央服务器取得最新的版本，编辑完了，再把新版本推送给中央服务器。中央服务器就好比是一个图书馆，你要改一本书，必须先从图书馆借出来，然后回到家自己改，改完了，再放回图书馆。
+
+When you are working on file A, lock file A, others cannot work on file A.
+After you are done with file A, check file in so that others can work on file A.
+
+
+When you check in file, just check in changes A0 => A0 + DELTA1 => A0 + DELTA2
+
+- 无法同时编辑
+- 必须联网
+- 没有推送给中央服务器的版本，不会被其他人看到（编辑到一半挂掉）
+
+
+
+
+=== GIT 分布式版本控制系统 ===
+
++ Get rid of lock file, clone of central system    
+  没有“中央服务器”，每个人的电脑上都有一个完整的版本库。
+  工作时无需联网，等有网的时候，再把本地的修改push到远程库。
+
++ 可同时协作编辑 & resolve conflicts：比方说你在自己电脑上改了文件A，你的同事也在他的电脑上改了文件A，这时，你们俩之间只需把各自的修改推送给对方，就可以互相看到对方的修改了。
+
++ Save every single version of the file on the way 记录每次对文件的改动
+  所有的版本控制系统只能跟踪文本文件的改动，比如TXT文件，网页，所有的程序代码等等。比如在第5行加了一个单词“Linux”，在第8行删了一个单词“Windows”。
+
+  图片、视频这些二进制文件，虽然也能由版本控制系统管理，但没法跟踪文件的变化，只能把二进制文件每次改动串起来，也就是只知道图片从100KB改成了120KB，但到底改了啥，版本控制系统不知道。Microsoft的Word格式是二进制格式，所以版本控制系统是没法跟踪Word文件的改动。
+
++ 分布式版本控制系统的安全性要高很多，因为每个人电脑里都有完整的版本库，某一个人的电脑坏掉了不要紧，随便从其他人那里复制一个就可以了。而集中式版本控制系统的中央服务器要是出了问题，所有人都没法干活了。
+
+
+
+
+
+
+
+mkdir gitdemo                  # create a new directory called 'gitdemo'
+rm -rf gitdemo                 # delete a directory 
+cd gitdemo/                    # go to this directory
+git init                       # Initialize the directory into a Git repo
+pwd                            # show path 
+ls -la                         # .git的目录是Git来跟踪管理版本库的, 千万不要手动修改这个目录里面的文件
+
+git config --global user.email "anniesui9627@gmail.com"
+git config --global user.name "Yufeng Sui"
+
+
+
+git branch                      # check all branches and which branch we are in
+git checkout master             # switch to branch 'master'
+git checkout -b feature1        # create a new feature branch 'feature1'
+git branch -D feature1          # delete a branch
+
+
+
+=== Part 2. 添加/修改文件需两步：Add and Commit ===
+
+vim filename.txt                # create a txt file
+git add filename.txt            # add txt file to current repo/ working directory
+git commit -m <message>         # commit message subject line: active tense, not personal, <15 characters
+
+git add .                       # add all 
+git commit                      # 会自动提示输入commit changes，进入insert mode之后输入，输入完 :x 
+                                # 可一次提交对多个文件的改动
+
+
+
+=== 创建新文件之后 ===
+git status                      # 显示 Untracked files
+git add filename.txt            # 显示 Changes to be committed: new file
+
+=== 改动文件之后 === 
+git status                      # 显示 Changes not staged for commit: modified
+git diff filename.txt           # 具体的改动，working directory和stage里文件的区别，有区别说明修改没有add
+
+
+git add filename.txt
+git status                      # 显示 Changes to be committed: modified
+
+git commit -m <message>
+git status                      # 显示 nothing to commit, working tree clean
+
+
+
+!!! 每次改完文件都要先add to stage, 再commit!!! 没有add的修改不会被commit
+1st change -> git add -> 2nd change -> git commit             # only commit first change, git diff 显示区别
+1st change -> git add -> 2nd change -> git add -> git commit  # commit both changes, git diff 无区别
+
+
+
+Working directory 工作区                      Repo版本库
+                                                |
+                                    ———————————— ————————————
+                                    |                        |
+                         ---->  stage 暂存区      --->     master branch
+                          add                   commit
+
+1. git add .      # 把所有修改添加到暂存区
+2. git commit     # 一次性把暂存区的所有修改提交到当前分支。提交之后，暂存区就没有内容了。
+                  # 可以分开add，但不能分开commit
+
+
+
+# repo版本库 in git means directory目录
+Repository vs. Directory:
+1. Can be shared
+2. Version control: keep track of changes
+
+
+
+
+
+=== Part 3. 撤销工作区 & 暂存区的修改 ===
+
+git checkout -- filename.txt       # 把文件在工作区的修改全部撤销 (i.e. 用repo的最新版本替换工作区的版本)
+                                   - 如果没有add to stage, 会回到和repo一样的版本
+                                   - 如果已经add to stage, 又做了修改，会回到和stage一样的版本
+
+git reset HEAD filename.txt        # 把暂存区的修改撤销，放回工作区  unstage changes after adding
+git status                         # 显示 Changes not staged for commit 说明工作区有改动，暂存区干净
+git checkout -- filename.txt       # 如果需要，把工作区的修改撤销, 替换成repo的版本
+
+
+
+
+=== Part 4. 版本回退：撤销repo中的修改 （前提是没有推送到远程库）===
+
+# 在Git中，用HEAD表示当前版本。上一个版本就是HEAD^，上上一个版本就是HEAD^^。往上100个版本是HEAD~100。
+git log                        # 查看commit history, 决定回哪个版本，starting from the most recent one, 按 q 退出
+git log --pretty=oneline
+git reset --hard HEAD^         # back to last version
+git log                        # 最新的commit没有了
+
+git reset --hard 1094a         # go to a 'future' version, 用那个commit id的前4-5位
+git reflog                     # 如果回退之后关机了，可找回关机前的commit id
+
+
+# Git的版本回退速度非常快，因为Git在内部有个HEAD指针 -> 指向当前分支(master) -> master指向当前版本
+# 当你回退版本的时候，Git仅仅是把指针指向了不同的版本。
+
+HEAD --> master -->  add a line
+                     | 
+                     add a line
+                     |
+                     Delete a line
+                     |
+                     add a file
+
+
+                     add a line
+                     | 
+HEAD --> master -->  add a line
+                     |
+                     Delete a line
+                     |
+                     add a file
+
+
+
+=== Part 5. Remove a file ===
+rm filename.txt                 # delete a file from working directory
+git status                      # 显示 changes not staged for commit: deleted
+
+# 确实要从repo中删除文件
+git rm filename.txt             # delete a file from repo
+git commit
+
+# 在工作区误删，从repo中恢复
+git checkout -- filename.txt    # 用repo的最新版本替换工作区的版本，无论工作区是修改还是删除，都可以一键还原
+                                # 没被添加到repo就删除的文件，是无法恢复的！
+                                # 如果修改后没提交就误删的话，只能恢复到repo的最新版，丢失最近一次提交后你修改的内容
+
+
+
+
+
+
+
+=== 远程仓库 ===
+
+# 本地Git仓库和GitHub仓库之间的传输是通过SSH加密，GitHub需要识别出你推送的提交确实是你推送的，而不是别人冒充。
+# Git支持SSH协议，所以，GitHub只要知道了你的公钥，就可以确认只有你自己才能推送。
+# id_rsa是私钥，不能泄露出去，id_rsa.pub是公钥，可以放心地告诉任何人。
+# GitHub允许添加多个Key。假定你有若干电脑，只要把每台电脑的Key都添加到GitHub，就可以在每台电脑上往GitHub推送了。
+
+ssh-keygen -t rsa -b 1024 (then keep pressing enter)      # create an SSH key
+ssh -T git@github.com                                     # test ssh connection to github
+
+
+
+ 
+=== Part 6. 为本地库添加远程库 ===
+
+# 现在你已经在本地创建了一个Git仓库，又想在GitHub创建一个Git仓库，并且让这两个仓库进行远程同步。
+# GitHub上的仓库既可以作为备份，又方便协作。
+
+Step 1. 在 github 上 create a new repo
+
+Step 2. 关联已有的本地仓库
+git remote add origin git@github.com:yfsui/gitdemo.git    # 添加后，远程库的名字就是origin （默认叫法）
+git remote                                                # 查看远程库的信息
+git remote -v                                             # 更详细的信息 (e.g. 抓取和推送的origin的地址)
+
+
+Step 3. 把本地库的内容推送到远程库上, 推送时要指定本地分支，这样Git就会把该分支推送到远程库对应的远程分支上
+git push origin master                                    # push master branch into 'origin'
+git push origin feature1
+git push origin HEAD                                      # push the branch you are on right now
+
+Step 4: 从现在起，只要本地commit后, 就可以用 git push origin master 把本地master分支的最新修改推送至远程库
+
+
+
+=== Part 7. 从远程库克隆一个本地库 ===
+
+Step 1. 在 github 上 create a new repo
+
+Step 2. 从远程库克隆一个本地库（多人协作时，每人各自从远程克隆一份就可以了）
+!!! must be in home directory (don't put a repo in a repo (gitdemo))！！！
+cd ..                                            # back to home directory 
+git clone git@github.com:yfsui/bokeh.git         # clone 'bokeh' repo 到本地
+cd bokeh/                                        # go to 'bokeh'
+git branch                                       # by default, only clone master branch
+git checkout -b local_dev origin/dev             # 创建远程origin的dev分支到本地
+
+Step 3: 从现在起，只要本地commit后, 就可以用 git push origin master 把本地master分支的最新修改推送至远程库
+
+
+
+
+
+=== Part 8. 推送至远程库时，远程库已经更新过 ===
+
+# error: failed to push, the tip of your current branch is behind its remote counterpart. Integrate the remote changes (e.g. 'git pull ...') before pushing again.
+
+Step 1. 把最新的提交从远程库抓下来
+git branch --set-upstream-to=origin/dev local_dev       # 指定本地local_dev分支与远程origin/dev分支的链接
+git pull 
+
+Step 2. 解决冲突（同merge branch conflicts)
+vim filename.txt                # 进入文件，查看冲突的具体内容
+git add .
+git commit
+git push origin local_dev
+
+
+# 解决冲突后，推送至远程前，用 git log 查看历史时，会有很多分叉
+# 可用 git rebase 把本地未push的分叉提交历史整理成直线， 目的是在查看历史提交的变化时更容易， 因为分叉的提交需要三方对比。
+git rebase                                 
+git log --graph
+
+# 推送至远程后，远程分支的提交历史也是一条直线
+git push origin master
+git log --graph
+
+
+
+
+
+
+
+=== Part 9. 分支 ===
+
+# HEAD指向当前分支（这里是master), master指向commit
+# 每次commit，master分支都会向前移动一步。随着你不断提交，master分支的线也越来越长。 
+
+HEAD --> master -->  add a line
+                        | 
+                     add a line
+                        |
+                     Delete a line
+                        |
+                     add a file
+
+# Create a branch 'dev': Git新建一个指针dev，指向master相同的commit，再把HEAD指向dev，表示当前分支在dev上
+# Git创建一个分支很快，因为除了增加一个dev指针，改改HEAD的指向，工作区的文件都没有任何变化
+
+        master -->  add a line   <-- dev  <-- HEAD
+                        | 
+                    add a line
+                        |
+                    Delete a line
+                        |
+                    add a file
+
+# 从现在开始，对工作区的修改和提交就是针对dev分支了，比如新提交一次后，dev指针往前移动一步，而master指针不变
+
+                    add a new file   <-- dev  <-- HEAD
+                        |
+        master -->  add a line   
+                        | 
+                    add a line
+                        |
+                    Delete a line
+                        |
+                    add a file
+
+
+# 此时查看master, 看不到刚刚在dev的修改
+
+                    add a new file   <-- dev 
+                        |
+HEAD --> master --> add a line   
+                        | 
+                    add a line
+                        |
+                    Delete a line
+                        |
+                    add a file
+
+
+# 在dev上的工作完成了，就可以把dev合并到master上
+# 如果是 fast forward 模式，master直接指向dev的当前commit
+  只是指针的移动, 没有新的commit, git log中看不出merge branch
+
+HEAD --> master --> add a new file   <-- dev  
+                        |
+                    add a line   
+                        | 
+                    add a line
+                        |
+                    Delete a line
+                        |
+                    add a file
+
+
+# 合并完，可以删除dev分支：把dev指针删掉
+
+HEAD --> master --> add a new file     
+                        |
+                    add a line   
+                        | 
+                    add a line
+                        |
+                    delete a line
+                        |
+                    add a file
+
+
+git checkout -b dev             # create & switch to a new branch 'dev'
+                                # -b参数表示创建并切换, 相当于以下两条命令
+                                  git branch dev
+                                  git checkout dev
+
+git branch                      # check all branches and which branch we are in
+git checkout master             # switch to branch 'master'
+
+git merge dev                   # merge dev to current branch
+                                # To pull dev into master: you need to be in master branch
+
+git branch -d feature1          # delete a branch
+
+
+
+
+
+
+=== merge branch 模式 ===
+
+1. 没有冲突的时候git会用 Fast-forward 合并: “快进模式”，直接把master指向dev的当前提交
+  + 只是指针的移动, 没有新的commit，速度非常快
+  - git log --graph 中看不出merge branch，删除分支后，会丢掉分支信息
+
+2. --no-ff参数: 用普通模式合并, master branch要做一个新的commit
+  + git log --graph 可以看出merge branch
+
+git merge --no-ff -m "merge with no-ff" dev
+
+HEAD --> master --> add a new file
+                        |
+                        |\
+                        | \
+                        |  add a new file <-- dev
+                        | /
+                        |/ 
+                        |
+                    add a line   
+                        | 
+                    add a line
+                        |
+                    delete a line
+                        |
+                    add a file
+
+
+
+
+=== Part 10. Solve merge conflicts ===
+
+# 对feature1和master分别做了修改后
+
+HEAD --> master --> add a word        add two words <-- feature1
+                            |         |
+                            add a line   
+                                | 
+                            add a line
+                                |
+                            delete a line
+                                |
+                            add a file
+
+git mege feature1               # Git无法执行“快速合并”, 提示有冲突，必须手动解决冲突后再提交
+git status                      # 查看有冲突的文件
+vim filename.txt                # 进入文件，查看冲突的具体内容
+
+                                # e.g. 冲突文件示例
+                                create a dev branch
+                                <<<<<<< HEAD
+                                this is master branch.
+                                =======
+                                create a feature 1 branch
+                                >>>>>>> feature1
+
+
+# resolve everything btw <<< and >>>, delete <<< and >>>
+
+git add .
+git commit
+
+    HEAD --> master -->   add both words
+                            |         |
+                   add a word         add two words <-- feature1
+                            |         |
+                            add a line   
+                                | 
+                            add a line
+                                |
+                            delete a line
+                                |
+                            add a file
+
+git branch -d feature1        # after merging, delete feature 1
+git log --graph               # 查看分支合并图
+
+
+
+
+=== Part 11. 删除没有merge的分支 ===
+# 新建feature1分支，改动并commit, 但没有merge，此时要删除feature1
+git branch -d feature1          # 显示 error: The branch 'feature1' is not fully merged.
+git branch -D feature1          # -D 强行删除没有merge的分支
+
+# 如果改动但没有add，或者add但没有commit，可用-d删除 (因为没有commit changes to faeture1, feature1是空的，可随意删)
+
+
+
+
+
+=== Part 12. Stash 储藏暂存区的文件 ===
+
+# working directory和stage是公开的，任何分支都会用到。
+# 只要在工作区、暂存区的改动没有commit到repo(某一个branch)中, 那么在任何一个分支下都可以看得到这个工作区、暂存区的最新实时改动 (git status或ls) 
+
+# 现在branch 1上的工作没有做完，但需要创建一个branch 2修复一些小bug。
+# 如果只add不commit branch 1的工作，之后在commit master的bug修复时，会把branch 1 add的工作也commit了。
+# 为了避免这个情况，在分支下add 再 git stash将工作隐藏。再切换到master修改bug，提交。分支的内容不会被提交上去。
+
+git add .                       # stash之前一定要add
+git stash                       # save working directory 把当前工作现场“储藏”起来，等恢复现场后继续工作
+git status                      # working tree clean now
+
+
+# 在branch 2修复好bug,再回到branch 1
+git stash list                  # 查看工作区的存储位置
+                                # 运行结果示例：stash@{0}: WIP on dev: 7bbd69b no ff
+
+
+# 同步bug修复到branch 1
+git cherry-pick 4c805e2         # 复制一个特定的提交到当前分支， 用在branch 2修复bug的commit id
+
+
+# 恢复工作区
+1. 恢复的同时把stash内容也删了
+git stash pop                 
+git stash list                  # nothing returned
+
+2. 恢复后，手动删除stash内容
+git stash apply  
+git stash drop                  # 删除stash内容    
+git stash apply stash@{0}       # 可多次stash，恢复的时候，先用git stash list查看，然后恢复指定的stash
+
+
+
+
+=== Part 13. tag标签 ===
+
+# tag 是指向某个commit的指针，方便查找（比commit ID好找）
+# tag 是指向commit的死指针，分支是指向commit的活指针
+# 如果这个commit既出现在master分支，又出现在dev分支，那么在这两个分支上都可以看到这个标签。
+
+git checkout master             # 切换到需要打标签的分支上
+git tag v1.0                    # add a tag, 默认标签是打在最新提交的commit上的
+git tag                         # 查看所有标签，标签不是按时间顺序列出，而是按字母排序的
+
+# 给之前的commit打标签
+git log --pretty=oneline --abbrev-commit             # 找到commit id
+git tag v0.9 f52c633          
+git show v0.9                                        # 查看标签信息
+
+# 带有说明的标签
+git tag -a v0.1 -m"version 0.1 released" 496499e     # -a指定标签名，-m指定说明文字    
+
+
+git push origin v1.0                                 # 推送某个标签到远程
+git push origin --tags                               # 推送所有标签到远程
+
+# 删除本地标签
+git tag -d v0.1                                      
+
+# 删除远程标签：先删除本地，再push
+git tag -d v0.9
+git push origin :refs/tags/v0.9
+
+
