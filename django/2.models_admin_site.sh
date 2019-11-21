@@ -179,68 +179,68 @@ $ cd ..
 $ python manage.py shell 
 
 
-In: from polls.models import Choice, Question       
+>>> from polls.models import Choice, Question       
 
-In: Question.objects.all() 	
-# Out: <QuerySet [<Question: What's up?>]> 
+>>> Question.objects.all() 	
+# <QuerySet [<Question: What's up?>]> 
 
 
 
 # === Get data, filter ===
 
-In: Question.objects.filter(id=1)                                                         
-# Out: <QuerySet [<Question: What's up?>]>
+>>> Question.objects.filter(id=1)                                                         
+# <QuerySet [<Question: What's up?>]>
 
-In: Question.objects.filter(question_text__startswith='What')                             
-# Out: <QuerySet [<Question: What's up?>]>
+>>> Question.objects.filter(question_text__startswith='What')                             
+# <QuerySet [<Question: What's up?>]>
 
-In: from django.utils import timezone
-In: current_year = timezone.now().year
-In: Question.objects.get(pub_date__year=current_year)   # Get the question that was published this year.
-# Out: <Question: What's up?>
+>>> from django.utils import timezone
+>>> current_year = timezone.now().year
+>>> Question.objects.get(pub_date__year=current_year)   # Get the question that was published this year.
+# <Question: What's up?>
 
-In: Question.objects.get(pk=1)  # primary-key exact lookups, equivalent to Question.objects.get(id=1)
-# Out: <Question: What's up?>
+>>> Question.objects.get(pk=1)  # primary-key exact lookups, equivalent to Question.objects.get(id=1)
+# <Question: What's up?>
 
-In: q = Question.objects.get(pk=1)
-In: q.was_published_recently()
-# Out: True
+>>> q = Question.objects.get(pk=1)
+>>> q.was_published_recently()
+# True
 
 
 
 
 # === Give the Question a couple of Choices ===
 
-In: q.choice_set.all()
-# Out: <QuerySet []>
+>>> q.choice_set.all()
+# <QuerySet []>
 
 # Create three choices.
-In: q.choice_set.create(choice_text='Not much', votes=0)
-# Out: <Choice: Not much>
-In: q.choice_set.create(choice_text='The sky', votes=0)
-# Out: <Choice: The sky>
-In: c = q.choice_set.create(choice_text='Just hacking again', votes=0)
+>>> q.choice_set.create(choice_text='Not much', votes=0)
+# <Choice: Not much>
+>>> q.choice_set.create(choice_text='The sky', votes=0)
+# <Choice: The sky>
+>>> c = q.choice_set.create(choice_text='Just hacking again', votes=0)
 
 # Question objects get access to Choice objects.
-In: q.choice_set.all()                                                                   
-# Out: <QuerySet [<Choice: Not much>, <Choice: The sky>, <Choice: Just hacking again>]>
+>>> q.choice_set.all()                                                                   
+# <QuerySet [<Choice: Not much>, <Choice: The sky>, <Choice: Just hacking again>]>
 
-In: q.choice_set.count()                                                                 
-# Out: 3
+>>> q.choice_set.count()                                                                 
+# 3
 
 # Choice objects also have API access to their related Question objects.
-In: c.question                                                                            
-# Out: <Question: What's up?>
+>>> c.question                                                                            
+# <Question: What's up?>
 
 
 # Use double underscores to separate relationships. This works as many levels deep as you want; there's no limit.
 # Find all Choices for any question whose pub_date is in this year
-In: Choice.objects.filter(question__pub_date__year=current_year)
-# Out: <QuerySet [<Choice: Not much>, <Choice: The sky>, <Choice: Just hacking again>]>
+>>> Choice.objects.filter(question__pub_date__year=current_year)
+# <QuerySet [<Choice: Not much>, <Choice: The sky>, <Choice: Just hacking again>]>
 
 # Delete one of the choices
-In: c = q.choice_set.filter(choice_text__startswith='Just hacking')
-In: c.delete()
+>>> c = q.choice_set.filter(choice_text__startswith='Just hacking')
+>>> c.delete()
 
 
 # ==================== Django Admin =====================
@@ -256,8 +256,8 @@ Password: polls9627
 
 
 # Start the development server 
-$ sudo /home/ys3273/project/env/bin/python manage.py runserver 0.0.0.0:80
-# Go back to external IP: change address to 35.245.82.219/admin/
+$ sudo /home/ys3273/project/envpoll/bin/python manage.py runserver 0.0.0.0:80
+# Go back to external IP: http://35.245.82.219/admin/
 # Login using admin and polls9627
 # See Django admin index page. "groups" and "users" are provided by django.contrib.auth, the authentication framework shipped by Django.
 
