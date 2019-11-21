@@ -13,7 +13,7 @@
 
 <h3>3. Django</h3>
 <ul>
-<li>Django official tutorials study notes (in progress)
+<li>Django official tutorials study notes (3/7 uploaded)
 </ul>
 
 <h3>4. 统计</h3>
