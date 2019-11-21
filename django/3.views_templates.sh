@@ -1,5 +1,5 @@
-https://docs.djangoproject.com/en/2.2/
-$ cd poll
+https://docs.djangoproject.com/en/2.2/intro/tutorial03/
+$ cd poll/
 $ source envpoll/bin/activate
 $ cd mysite/
 
@@ -299,11 +299,5 @@ $ vim polls/urls.py
 $ vim polls/templates/polls/index.html
 
 		<li><a href="{% url 'polls:detail' question.id %}">{{ question.question_text }}</a></li>
-
-
-
-
-
-
 
 
