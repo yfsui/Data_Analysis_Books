@@ -1,6 +1,11 @@
+https://docs.djangoproject.com/en/2.2/intro/tutorial02/
+$ cd poll/
+$ source envpoll/bin/activate
+$ cd mysite/
+
+
 # ================ Database setup ================
 
-$ cd poll/mysite/              # go to ~/poll/mysite
 $ vim mysite/settings.py
 
 
