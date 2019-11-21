@@ -17,7 +17,7 @@ $ cd poll/
 # Dependency problem: software packages which have dependencies on specific versions of other software packages
 # e.g. need version 2 for this project but version 3 for another
 
-# Solve dependency problem by creating different virtual environments
+# Solve dependency problems by creating different virtual environments
 # Create a new virtual environment for a new project
 # We'll have a copy of python executables in each environment
 
@@ -89,6 +89,7 @@ $ vim settings.py                           # change allowed host to ['*']
 
 # To create your app, make sure you’re in the same directory as manage.py
 # so that it can be imported as its own top-level module, rather than a submodule of mysite.
+# The directory with  manage.py This is the root directoy of project
 
 $ python manage.py startapp polls 
 $ ls    									 # show -> db.sqlite3  manage.py  mysite  polls
@@ -111,7 +112,7 @@ $ vim views.py               # import and def "index" view
 # ============= Map view to a URL =====================
 
 # To call the view, we need to map it to a URL - and for this we need a URLconf.
-# To create a URLconf in the polls directory, create a file called urls.py
+# Create a URLconf in the polls directory: polls/urls.py
 $ vim urls.py
 
 		from django.urls import path
@@ -134,16 +135,15 @@ $ vim urls.py
 # "views.index" sends back this http response
 
 
-# The next step is to point the root URLconf at the polls.urls module.
-$ cd ..          			# back to ~/poll/mysite
-$ cd mysite/     			# theng go to ~/poll/mysite/mysite
-$ vim urls.py
+# Point the root URLconf at the polls.urls module.
+$ cd ..          			# back to ~/poll/mysite: root directory (where manage.py is in)
+$ vim mysite/urls.py     	# root URLconf
 
 		from django.contrib import admin
 		from django.urls import include, path
 
 		urlpatterns = [
-		    path('polls/', include('polls.urls')),
+		    path('polls/', include('polls.urls')),  # point the root URLconf at the polls.urls
 		    path('admin/', admin.site.urls),
 		]
 
@@ -158,7 +158,7 @@ $ vim urls.py
 
 
 $ cd ..          			# back to ~/poll/mysite
-$ sudo /home/ys3273/project/env/bin/python manage.py runserver 0.0.0.0:80
-# Go back to external IP: change address to 35.245.82.219/polls/ 
+$ sudo /home/ys3273/project/envpoll/bin/python manage.py runserver 0.0.0.0:80
+# Go back to external IP: http://35.245.82.219/polls/ 
 # -> show the text defined in the "index" view: "Hello, world. You're at the polls index."
 
